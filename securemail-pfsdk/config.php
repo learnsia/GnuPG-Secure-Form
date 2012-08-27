@@ -6,10 +6,10 @@
 // THIS IS used to redirect the user to the secure
 // form at https://, if they browse to the http:// location
 // NO trailing slash.
-$SERVER_NAME = "";
+$SERVER_NAME = '';
 
 // Path to GNUPG
-$GNUPG = "";
+$GNUPG = '';
 
 // YOUR GNUPG email
 // This is the key selected to send the encrypted email to
@@ -18,17 +18,17 @@ $YOUR_KEY = '';
 
 // Location of the gnupg keys,
 // WARNING!! This should be outside the web root.
-$GNUPG_HOME = "";
+$GNUPG_HOME = '';
 
 // Email address where the email will be sent.
-$SEND_TO = "";
+$SEND_TO = '';
 
 // This is the temp directory to encrypt the message and files.
 // The web user must have write permissions to this directory
 // WARNING!! This should be outside the web root.
 
 // Add the TRAILING SLASH
-$TEMP_DIR = "";
+$TEMP_DIR = '';
 
 // File size limit.
 // This is where you set how large of an attachment you'll accept.
@@ -37,18 +37,16 @@ $TEMP_DIR = "";
 // Also, you'll you have have to adjust the execution time 
 // settings to accomodate slow uploads or the script will
 // timeout.
-$FILE_SIZE_LIMIT = "";
+$FILE_SIZE_LIMIT = '';
 
 // LOCATION of the XML file.
 // THIS SHOULD BE OUTSIDE THE WEB DIRECTORY
 // Use relative or absolute path.
-$XML_FILE = "";
+$XML_FILE = '';
 
 // LOCATION of the PFSDK API
 // THIS SHOULD BE OUTSIDE THE WEB DIRECTORY
 // Use relative or absolute path
-$PFSDK_AUTH = "";
+$PFSDK_AUTH = '';
 
 /**********   END USER EDITS ***************/
-
-?>

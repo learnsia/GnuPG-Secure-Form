@@ -1,10 +1,10 @@
 <?php
 
-if($_SERVER['REMOTE_ADDR'] != "127.0.0.1" && $_SERVER['HTTP_PORT'] != "80")
+if(($_SERVER['REMOTE_ADDR'] != '127.0.0.1') && ($_SERVER['HTTP_PORT'] != '80'))
 {
    header ('Location: https://'.$SERVER_NAME.'/'.$_SERVER['REQUEST_URI']);
-
-} else {
+   exit();
+}
 
 ?>
 
@@ -36,9 +36,3 @@ if($_SERVER['REMOTE_ADDR'] != "127.0.0.1" && $_SERVER['HTTP_PORT'] != "80")
 </FORM>
 </BODY>
 </HTML>
-
-<?php
-
-}
-
-?>
