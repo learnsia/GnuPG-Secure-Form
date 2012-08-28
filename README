@@ -3,6 +3,8 @@
 Duane Dunston
 thedunston@gmail.com
 
+TODO: Add Asterisk Calling two-factor auth using the method from h2H Messenger.
+
 /*******************/
 
 GnuPG Secure Form
@@ -38,10 +40,10 @@ That will create the directory:  recaptcha-php-1.11/  Change it so that it is na
 /********************  Two factor authentication ********************/
 
 The other version uses two-factor authentication, which was more for fun after reading about phone authentication as a two-factor solution.
+ 
+There is a mini admin script with it named "admin.php." You should move that file to a password protected directory where you can create accounts only after some form 
 
-There is a mini admin script with it named "admin.php." You should move that file to a password protected directory where you can create accounts only after some form of authentication.  This script allows you to create a username, password, and the user's phone number, which is stored in an XML file using RIPEMD 160 for the password hash.
-
-After the username and password are entered, it uses the free Phonefactor.com service service and API to call the user.  The free service only accepts a "#" as the authentication token.  After entering the "#," the user is then redirected to the secure web form.  Again, there is probably no practical need for the two-factor authentication for this script, but thought I'd include it.
+After the username and password are entered, it uses the free Phonefactor.com service service and API to call the user.  The free service only accepts a "#" as the aut
 
 For the Phone Factor authentication, you'll have to setup an account on their website: http://www.phonefactor.com
 
