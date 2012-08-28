@@ -2,7 +2,7 @@
 
 session_start();
 
-include('config.php');
+include 'config.php';
 
 $username = $_SESSION['s_user'];
 $phone = $_SESSION['s_phone'];

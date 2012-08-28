@@ -1,6 +1,6 @@
 <?php
 
-include('config.php');
+include 'config.php';
 
 /* Script put together with code from:
 
@@ -177,5 +177,3 @@ if ($ok) {
 	echo "<p>mail could not be sent!</p>";
  
 }
- 
-?>
