@@ -1,6 +1,6 @@
 <?php
 
-include('config.php');
+include 'config.php';
 
 if ($_POST['submit'] == "Add") {
 
@@ -167,5 +167,3 @@ if ($_POST['submit'] == "Add") {
 <?php
 
 } // end main if statement
-
-?>

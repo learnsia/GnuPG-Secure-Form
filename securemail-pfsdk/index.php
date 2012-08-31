@@ -2,27 +2,25 @@
 
 session_start();
 
-include('config.php');
+include 'config.php';
 
 if($_SERVER['REMOTE_ADDR'] != "127.0.0.1" && $_SERVER['HTTP_PORT'] != "80") {
 
    header ('Location: https://'. $SERVER_NAME.'/'.$_SERVER['REQUEST_URI']);
-
+	exit();
 } 
 
-
 if ($_POST['Login']) {
-
 
 	$user = trim($_POST['user']);
 	$pass = trim($_POST['pass']);
 
 	// Data validation
 	if (!preg_match("/^[a-zA-Z0-9]{1,8}$/",$user))
- 	  die("Incorrect username.");
+ 	  exit("Incorrect username.");
 
 	$xml = simplexml_load_file($XML_FILE)
-          or die("Unable to open document.");
+          or exit("Unable to open document.");
 
 	foreach ($xml->user as $users) {
 
@@ -71,5 +69,3 @@ if ($_POST['Login']) {
 <?php
 
 }
-
-?>

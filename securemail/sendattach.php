@@ -1,6 +1,6 @@
 <?php
 
-include('config.php');
+include 'config.php';
 
 /* Script put together with code from:
 
@@ -16,15 +16,15 @@ $sender_email = trim(addslashes($_POST['sender_email']));
 $secret_msg = strip_tags($_POST['secret_msg']);
 
 // Some data validation
-if ($sender_name == "" || $sender_email == "" || $secret_msg == "" )
-  die("All fields must be filled out.");
+if ($sender_name == '' || $sender_email == '' || $secret_msg == '' )
+  exit('All fields must be filled out.');
 
 // Check to be sure we have a valid email address
 if (eregi("^[a-z0-9]+([_\\.-][a-z0-9]+)*@([a-z0-9]+([\.-][a-z0-9]+))*$",$sender_email, $regs)) {
 
 } else { 
 
-echo "Error: '$sender_email' isn't a valid mail address!\n";
+echo "Error: '{$sender_email}' isn't a valid mail address!\n";
 exit(); 
 
 } 
@@ -44,28 +44,28 @@ $file2_size = $_FILES['file']['size'][1];
 
 // If the files are over 5MB then error
 if ($file1_size > $FILE_SIZE_LIMIT) 
-  die("<b>$file1</b> is too large.  Files must be less than 5MB");
+  exit("<b>{$file1}</b> is too large.  Files must be less than 5MB");
 
 if ($file2_size > $FILE_SIZE_LIMIT) 
-  die("<b>$file2</b> is too large.  Files must be less than 5MB");
+  exit("<b>{$file2}</b> is too large.  Files must be less than 5MB");
 
 // Clean up file names
-$file1 = preg_replace("/[^[[:alnum:]]]/", "_", $file1);
-$file2 = preg_replace("/[^[[:alnum:]]]/", "_", $file2);
+$file1 = preg_replace("/[^[[:alnum:]]]/", '_', $file1);
+$file2 = preg_replace("/[^[[:alnum:]]]/", '_', $file2);
 
 // Put the files into an array to be processed for encryption
 $the_files = array($file1, $file2);
 $the_files_tmp = array($file1_tmp, $file2_tmp);
- 
+
 //set the environment variable for PGPPATH
-putenv("GNUPGHOME=".$GNUPG_HOME); 
-   
+putenv('GNUPGHOME='.$GNUPG_HOME); 
+
 // email fields: to, from, subject, and so on
 $to = $SEND_TO;
-$from = "$sender_email";
-$subject ="Secure email from $sender_email";
-$message = "$secret_msg";
-$headers = "From: $from";
+$from = "{$sender_email}";
+$subject ="Secure email from {$sender_email}";
+$message = "{$secret_msg}";
+$headers = "From: {$from}";
  
 // boundary
 $semi_rand = md5(time());
@@ -82,8 +82,8 @@ BEGIN MESSAGE ENCRYPTION
 $GNUPG = escapeshellcmd($GNUPG);
 
  	//create vars to hold paths and filenames
-        $plainTxt = $TEMP_DIR . "$random_hash" . "data";
-        $crypted = $TEMP_DIR . "$random_hash" . "pgpdata";
+        $plainTxt = $TEMP_DIR . "{$random_hash}" . 'data';
+        $crypted = $TEMP_DIR . "{$random_hash}" . 'pgpdata';
 
         //open file and dump in plaintext contents
         $fp = fopen($plainTxt, "w+");
@@ -91,7 +91,7 @@ $GNUPG = escapeshellcmd($GNUPG);
         fclose($fp);
 
         //invoke PGP to encrypt file contents
-        system("$GNUPG --encrypt -ao $crypted -r $YOUR_KEY $plainTxt");
+        system("{$GNUPG} --encrypt -ao {$crypted} -r {$YOUR_KEY} {$plainTxt}");
 
         //open file and read encrypted contents into var
         $fd = fopen($crypted, "r");
@@ -116,7 +116,7 @@ for($x=0;$x<count($the_files);$x++){
 
 	$the_file = $the_files[$x];
 
-	if ($the_file == "") {
+	if ($the_file == '') {
 
 	} else {
 
@@ -127,8 +127,8 @@ for($x=0;$x<count($the_files);$x++){
 	BEGIN FILE ENCRYPTION 
 	*********************************************/
 	        //create vars to hold paths and filenames
-	        $plainTxt = $TEMP_DIR. "$random_hash" . "data";
-	        $crypted = $TEMP_DIR. "$random_hash" . "pgpdata";
+	        $plainTxt = $TEMP_DIR. "{$random_hash}" . 'data';
+	        $crypted = $TEMP_DIR. "{$random_hash}" . 'pgpdata';
 	
 
 	        //open file and dump in plaintext contents
@@ -137,7 +137,7 @@ for($x=0;$x<count($the_files);$x++){
 	        fclose($fp);
 	
 	        //invoke PGP to encrypt file contents
-	        system("$GNUPG --encrypt -ao $crypted -r $YOUR_KEY $plainTxt");
+	        system("{$GNUPG} --encrypt -ao {$crypted} -r {$YOUR_KEY} {$plainTxt}");
 	
 	        //open file and read encrypted contents into var
 	        $fd = fopen($crypted, "r");
@@ -168,14 +168,11 @@ for($x=0;$x<count($the_files);$x++){
 $ok = @mail($to, $subject, $message, $headers);
  
 if ($ok) {
- 
- 
-	echo "<p>mail sent to $to!</p>";
+
+	echo "<p>mail sent to {$to}!</p>";
  
 } else {
  
 	echo "<p>mail could not be sent!</p>";
  
 }
- 
-?>
