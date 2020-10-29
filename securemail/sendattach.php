@@ -66,7 +66,7 @@ if (!is_dir($GNUPG_HOME))
 $res = gnupg_init();
 putenv("GNUPGHOME=".$GNUPG_HOME); 
 gnupg_seterrormode($res,GNUPG_ERROR_WARNING);
-gnupg_addencryptkey($res,"AC185BB10B8B7605491FE6F5F3796D1FE505BCA4");
+gnupg_addencryptkey($res,$YOUR_FINGERPRINT);
 $enc_secret_msg = gnupg_encrypt($res, $secret_msg);
 
 if ($enc_secret_msg == "")
