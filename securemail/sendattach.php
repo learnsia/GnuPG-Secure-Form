@@ -1,6 +1,6 @@
 <?php
 
-include 'config.php';
+include('config.php');
 
 /* Script put together with code from:
 
@@ -13,14 +13,14 @@ and Julie Meloni "Getting Started with GnuPG"
 // Declare Variables
 $sender_name = trim(addslashes(htmlentities($_POST['sender_name'])));
 $sender_email = trim(addslashes($_POST['sender_email']));
-$secret_msg = strip_tags($_POST['secret_msg']);
+$secret_msg = htmlentities($_POST['secret_msg'], ENT_QUOTES);
 
 // Some data validation
 if ($sender_name == '' || $sender_email == '' || $secret_msg == '' )
   exit('All fields must be filled out.');
 
 // Check to be sure we have a valid email address
-if (eregi("^[a-z0-9]+([_\\.-][a-z0-9]+)*@([a-z0-9]+([\.-][a-z0-9]+))*$",$sender_email, $regs)) {
+if (filter_var($sender_email, FILTER_VALIDATE_EMAIL)) {
 
 } else { 
 
@@ -44,10 +44,10 @@ $file2_size = $_FILES['file']['size'][1];
 
 // If the files are over 5MB then error
 if ($file1_size > $FILE_SIZE_LIMIT) 
-  exit("<b>{$file1}</b> is too large.  Files must be less than 5MB");
+  exit("<b>{$file1}</b> is too large.  Files must be less than $FILE_SIZE_LIMIT"."MB");
 
 if ($file2_size > $FILE_SIZE_LIMIT) 
-  exit("<b>{$file2}</b> is too large.  Files must be less than 5MB");
+  exit("<b>{$file2}</b> is too large.  Files must be less than $FILE_SIZE_LIMIT"."MB");
 
 // Clean up file names
 $file1 = preg_replace("/[^[[:alnum:]]]/", '_', $file1);
@@ -58,56 +58,36 @@ $the_files = array($file1, $file2);
 $the_files_tmp = array($file1_tmp, $file2_tmp);
 
 //set the environment variable for PGPPATH
-putenv('GNUPGHOME='.$GNUPG_HOME); 
+//error_reporting(E_ALL);
+
+if (!is_dir($GNUPG_HOME))
+	die("GNUPG Home dir doesn't exist.  Please check the config file.");
+
+$res = gnupg_init();
+putenv("GNUPGHOME=".$GNUPG_HOME); 
+gnupg_seterrormode($res,GNUPG_ERROR_WARNING);
+gnupg_addencryptkey($res,"AC185BB10B8B7605491FE6F5F3796D1FE505BCA4");
+$enc_secret_msg = gnupg_encrypt($res, $secret_msg);
+
+if ($enc_secret_msg == "")
+	die("Error preparing message.");
 
 // email fields: to, from, subject, and so on
-$to = $SEND_TO;
-$from = "{$sender_email}";
-$subject ="Secure email from {$sender_email}";
-$message = "{$secret_msg}";
-$headers = "From: {$from}";
+$to = $sender_email;
+$from = "$sender_email";
+$subject ="Secure email from $sender_email";
+$message = "$enc_secret_msg";
+$headers = "From: $from";
  
 // boundary
 $semi_rand = md5(time());
-$mime_boundary = "------------{$semi_rand}x";
+$mime_boundary = "--==_mimepart_{$semi_rand}";
  
-// headers for attachment
-$headers .= "\nMIME-Version: 1.0\n" . "X-Enigmail-Version: 1.1.1\n" . "Content-Type: multipart/mixed;" . " boundary={$mime_boundary}";
-
-/*********************************************
-BEGIN MESSAGE ENCRYPTION 
-*********************************************/
-
-// escape command arguments
-$GNUPG = escapeshellcmd($GNUPG);
-
- 	//create vars to hold paths and filenames
-        $plainTxt = $TEMP_DIR . "{$random_hash}" . 'data';
-        $crypted = $TEMP_DIR . "{$random_hash}" . 'pgpdata';
-
-        //open file and dump in plaintext contents
-        $fp = fopen($plainTxt, "w+");
-        fputs($fp, $message);
-        fclose($fp);
-
-        //invoke PGP to encrypt file contents
-        system("{$GNUPG} --encrypt -ao {$crypted} -r {$YOUR_KEY} {$plainTxt}");
-
-        //open file and read encrypted contents into var
-        $fd = fopen($crypted, "r");
-        $message = fread($fd, filesize($crypted));
-        fclose($fd);
-
-        //delete files!
-        unlink($plainTxt);
-        unlink($crypted);
-
-/*********************************************
-END MESSAGE ENCRYPTION 
-*********************************************/
+// Email headers
+$headers .= "\nMIME-Version: 1.0\n" . "X-Enigmail-Version: 1.1.1\n" . "Content-Type: multipart/mixed;\n" . " boundary=\"$mime_boundary\";\n charset=UTF-8\nContent-Transfer-Encoding: 7bit";
 
 // multipart boundary
-$message = "This is a multi-part message in MIME format.\n\n" . "--{$mime_boundary}\n" . "Content-Type: text/plain; charset=\"iso-8859-1\"\n" . "Content-Transfer-Encoding: 7bit\n\n" . $message . "\n\n";
+$message .= "This is a multi-part message in MIME format.\n\n" . "--{$mime_boundary}\n" . "Content-Type: text/plain; charset=\"UTF-8\"\n" . "Content-Transfer-Encoding: 7bit\n\n" . $message . "\n\n";
   
 $message .= "--{$mime_boundary}\n";
 
@@ -116,50 +96,48 @@ for($x=0;$x<count($the_files);$x++){
 
 	$the_file = $the_files[$x];
 
+	// If there is no file attachment then skip
 	if ($the_file == '') {
 
 	} else {
-
-		// Read file contents into variable
-	        $file = file_get_contents($the_files_tmp[$x]);
 	
 	/*********************************************
 	BEGIN FILE ENCRYPTION 
 	*********************************************/
-	        //create vars to hold paths and filenames
-	        $plainTxt = $TEMP_DIR. "{$random_hash}" . 'data';
-	        $crypted = $TEMP_DIR. "{$random_hash}" . 'pgpdata';
-	
 
-	        //open file and dump in plaintext contents
-	        $fp = fopen($plainTxt, "w+");
-	        fputs($fp, $file);
-	        fclose($fp);
-	
-	        //invoke PGP to encrypt file contents
-	        system("{$GNUPG} --encrypt -ao {$crypted} -r {$YOUR_KEY} {$plainTxt}");
-	
-	        //open file and read encrypted contents into var
-	        $fd = fopen($crypted, "r");
-	        $data = fread($fd, filesize($crypted));
-	        fclose($fd);
-	
-	        //delete files!
-	        unlink($plainTxt);
-	        unlink($crypted);
+		// Read file contents into variable
+	        $file_plain = file_get_contents($the_files_tmp[$x]);
+
+		// Set Environment variable
+		//putenv('GNUPGHOME=/var/www/.gnupg');
+		gnupg_addencryptkey($res,"AC185BB10B8B7605491FE6F5F3796D1FE505BCA4");
+		$enc_file_contents = gnupg_encrypt($res, $file_plain);
+
+		// Convert to base64
+		$data = chunk_split(base64_encode($enc_file_contents));
+
+	       	// fputs($fp, $enc_file_contents);
+		// New Temp Directory
+		// Gets around the issue with systemd putting temp files in a random directory
+		// under /tmp on Ubuntu at least.
+		// https://www.the-art-of-web.com/php/where-is-tmp/
+		$file = new \SplFileObject(sys_get_temp_dir() . "/$the_files[$x].gpg", "w");
+		$file->fwrite($data);
 	  
-	    $the_files[$x] = preg_replace("/[^a-zA-Z0-9\._-]/", "_", $the_files[$x]);
-	    $data = chunk_split(base64_encode($data));
-	    $message .= "Content-Type: {\"application/octet-stream\"};\n" . " name=\"$the_files[$x].gpg\"\n" .
-	    "Content-Disposition: attachment;\n" . " filename=\"$the_files[$x].gpg\"\n" .
-	    "Content-Transfer-Encoding: base64\n\n" . $data . "\n\n";
-	    $message .= "--{$mime_boundary}\n";
+		// Attachment Format	
+		$the_files[$x] = preg_replace("/[^a-zA-Z0-9\._-]/", "_", $the_files[$x]);
+		$message .= "Content-Type: application/octet-stream;\n" . " name=$the_files[$x].gpg\n" .
+		"Content-Disposition: attachment; " . " filename=$the_files[$x].gpg\n" .
+		"Content-Transfer-Encoding: base64\n\n" . $data . "\n\n";
+		$message .= "--{$mime_boundary}\n";
 	
+		// wipe the new file.
+		$file = NULL;
 	/*********************************************
 	END FILE ENCRYPTION 
 	*********************************************/
   
-} //end for loop
+	} //end for loop
 
 }
  
